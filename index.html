@@ -87,17 +87,14 @@
 <div class="container">
   <h1>JARVIS</h1>
   
-  <!-- MİKROFON BUTONU -->
   <div class="arc-reactor" id="mic-btn">
     <div class="core"></div>
   </div>
   
-  <div id="status">Hazır...</div>
+  <div id="status">Ekrana bir kez dokunun...</div>
   
-  <!-- MESAJ GEÇMİŞİ -->
   <div id="chat-box"></div>
   
-  <!-- YAZMA KUTUSU VE GÖNDER BUTONU -->
   <div class="input-group">
     <input type="text" id="user-input" placeholder="Jarvis'e bir şeyler yazın...">
     <button id="send-btn">Gönder</button>
@@ -111,40 +108,67 @@
   const userInput = document.getElementById('user-input');
   const sendBtn = document.getElementById('send-btn');
 
+  let audioUnlocked = false;
+
+  // Mobilde ses iznini aktifleştirme
+  document.body.addEventListener('click', () => {
+    if (!audioUnlocked) {
+      const initUtterance = new SpeechSynthesisUtterance("");
+      window.speechSynthesis.speak(initUtterance);
+      audioUnlocked = true;
+      status.innerText = "Hazır...";
+    }
+  }, { once: true });
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'tr-TR';
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
   function processCommand(text) {
     if (!text || text.trim() === "") return;
     
-    // Kullanıcı mesajını yazdır
     chatBox.innerHTML += `<p style="color:#ffffff;"><b>Siz:</b> ${text}</p>`;
     const lowerText = text.toLowerCase();
 
-    // Spotify Kontrolü
     if (lowerText.includes("spotify")) {
-      chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> Emredersiniz Murat Bey, Spotify açılıyor...</p>`;
-      status.innerText = "Spotify çalıştırılıyor...";
-      window.location.href = "macrodroid://action?name=spotify";
+      const reply = "Derhal Murat Bey, Spotify sistemini devreye sokuyorum.";
+      chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
+      status.innerText = "Spotify açılıyor...";
+      
+      speak(reply);
+
+      // Doğrudan Spotify Uygulama Bağlantısı (Android Intent)
+      setTimeout(() => {
+        window.location.href = "intent://com.spotify.music/#Intent;scheme=android-app;end";
+      }, 1000);
+
     } else {
-      chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> Komut alındı Murat Bey: "${text}"</p>`;
+      const reply = `Anlaşıldı Murat Bey: ${text}`;
+      chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
       status.innerText = "Komut işlendi.";
+      speak(reply);
     }
     
     chatBox.scrollTop = chatBox.scrollHeight;
     userInput.value = "";
   }
 
-  // Butona basarak gönderme
   sendBtn.addEventListener('click', () => {
     processCommand(userInput.value);
   });
 
-  // Enter tuşuna basarak gönderme
   userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       processCommand(userInput.value);
     }
   });
 
-  // Sesli Mikrofon Dinleme
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (Recognition) {
     const recognition = new Recognition();
@@ -164,7 +188,7 @@
       status.innerText = "Ses anlaşılamadı.";
     };
   } else {
-    status.innerText = "Tarayıcınız ses tanımayı desteklemiyor.";
+    status.innerText = "Tarayıcı ses tanımayı desteklemiyor.";
   }
 </script>
 
