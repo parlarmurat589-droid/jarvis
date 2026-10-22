@@ -45,7 +45,6 @@
   .icon-btn.on { color: var(--cyan); border-color: var(--cyan); }
   .icon-btn:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
-  /* Reaktör: uygulamanın tek dikkat çekici öğesi */
   .reactor-wrap { display: flex; flex-direction: column; align-items: center; padding: 4px 0 8px; }
   .reactor { width: 120px; height: 120px; }
   .reactor .ring-spin { transform-origin: 60px 60px; animation: spin 14s linear infinite; }
@@ -246,6 +245,19 @@
   async function send(text) {
     text = text.trim();
     if (!text || busy) return;
+
+    /* MacroDroid Otomasyon Tetikleme */
+    var cmd = text.toLowerCase();
+    if (cmd.includes("spotify") || cmd.includes("müzik aç")) {
+      window.location.href = "macrodroid://action?name=spotify";
+    } else if (cmd.includes("youtube") || cmd.includes("video aç")) {
+      window.location.href = "macrodroid://action?name=youtube";
+    } else if (cmd.includes("instagram")) {
+      window.location.href = "macrodroid://action?name=instagram";
+    } else if (cmd.includes("whatsapp")) {
+      window.location.href = "macrodroid://action?name=whatsapp";
+    }
+
     var key = getKey();
     if (!key) { $("keyDialog").showModal(); return; }
 
@@ -326,3 +338,5 @@
 </script>
 </body>
 </html>
+
+    
