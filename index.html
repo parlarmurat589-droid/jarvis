@@ -14,21 +14,23 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
     .container {
       text-align: center;
-      width: 90%;
-      max-width: 400px;
+      width: 100%;
+      max-width: 450px;
     }
     .arc-reactor {
-      width: 120px;
-      height: 120px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       border: 4px solid #00f2ff;
       box-shadow: 0 0 20px #00f2ff, inset 0 0 20px #00f2ff;
-      margin: 20px auto;
+      margin: 15px auto;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -41,16 +43,132 @@
       100% { box-shadow: 0 0 15px #00f2ff, inset 0 0 15px #00f2ff; }
     }
     .core {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       background-color: #ffffff;
       border-radius: 50%;
       box-shadow: 0 0 15px #ffffff;
     }
     #status {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      color: #7ef2ff;
     }
     #chat-box {
-      background: rgba(0,
-                       
+      background: rgba(0, 242, 255, 0.05);
+      border: 1px solid #00f2ff;
+      border-radius: 10px;
+      padding: 15px;
+      height: 220px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+    #user-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #00f2ff;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    #send-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #00f2ff;
+      color: #0b0f19;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>JARVIS</h1>
+  <div class="arc-reactor" id="mic-btn">
+    <div class="core"></div>
+  </div>
+  <div id="status">Komut bekliyor...</div>
+  <div id="chat-box"></div>
+  
+  <!-- Yazı Yazma Alanı -->
+  <div class="input-group">
+    <input type="text" id="user-input" placeholder="Jarvis'e bir şeyler yazın...">
+    <button id="send-btn">Gönder</button>
+  </div>
+</div>
+
+<script>
+  const micBtn = document.getElementById('mic-btn');
+  const status = document.getElementById('status');
+  const chatBox = document.getElementById('chat-box');
+  const userInput = document.getElementById('user-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  function processCommand(text) {
+    if (!text.trim()) return;
+    
+    chatBox.innerHTML += `<p><b>Siz:</b> ${text}</p>`;
+    const lowerText = text.toLowerCase();
+
+    // Spotify Tetikleme Kontrolü
+    if (lowerText.includes("spotify")) {
+      chatBox.innerHTML += `<p><b>Jarvis:</b> Derhal Murat Bey, Spotify sistemini devreye sokuyorum.</p>`;
+      status.innerText = "Spotify açılıyor...";
+      window.location.href = "macrodroid://action?name=spotify";
+    } else {
+      chatBox.innerHTML += `<p><b>Jarvis:</b> Komut anlaşıldı Murat Bey.</p>`;
+      status.innerText = "Komut alındı.";
+    }
+    
+    chatBox.scrollTop = chatBox.scrollHeight;
+    userInput.value = "";
+  }
+
+  // Yazıyla Gönderme
+  sendBtn.addEventListener('click', () => {
+    processCommand(userInput.value);
+  });
+
+  userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      processCommand(userInput.value);
+    }
+  });
+
+  // Sesle Gönderme
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (Recognition) {
+    const recognition = new Recognition();
+    recognition.lang = 'tr-TR';
+
+    micBtn.addEventListener('click', () => {
+      recognition.start();
+      status.innerText = "Dinleniyor...";
+    });
+
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      processCommand(text);
+    };
+
+    recognition.onerror = () => {
+      status.innerText = "Ses anlaşılamadı.";
+    };
+  } else {
+    status.innerText = "Tarayıcı ses tanımayı desteklemiyor.";
+  }
+</script>
+
+</body>
+</html>
+
+      
