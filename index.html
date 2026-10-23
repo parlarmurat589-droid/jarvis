@@ -52,6 +52,7 @@
       margin-bottom: 8px;
       color: #7ef2ff;
       font-weight: bold;
+      transition: color 0.3s ease;
     }
     #chat-box {
       background: rgba(0, 242, 255, 0.05);
@@ -143,15 +144,12 @@
 </div>
 
 <script>
-// 🚀 Otomatik v2 Sürüm Güncellemeli Service Worker Kaydı
+// Service Worker Kaydı
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js?v=2')
-      .then(reg => {
-        console.log('Yeni SW Başarılı:', reg.scope);
-        reg.update(); // Eski önbelleği zorla günceller
-      })
-      .catch(err => console.log('SW Hatası:', err));
+      .then(reg => reg.update())
+      .catch(() => {});
   });
 }
 
@@ -164,38 +162,6 @@ const apiKeyInput = document.getElementById('api-key-input');
 const saveApiBtn = document.getElementById('save-api-btn');
 
 let audioUnlocked = false;
-
-window.addEventListener('DOMContentLoaded', () => {
-  const savedKey = localStorage.getItem('JARVIS_API_KEY');
-  if (savedKey) {
-    apiKeyInput.value = savedKey;
-    statusText.innerText = "Sistemler aktif, sizi dinliyorum Murat Usta.";
-  }
-});
-
-saveApiBtn.addEventListener('click', () => {
-  const key = apiKeyInput.value.trim();
-  if (key && key.length > 5) {
-    localStorage.setItem('JARVIS_API_KEY', key);
-    statusText.style.color = "#4ade80";
-    statusText.innerText = "✅ API Anahtarı Kaydedildi!";
-    setTimeout(() => {
-      statusText.style.color = "#7ef2ff";
-      statusText.innerText = "Hazır, komut verebilirsiniz Murat Usta.";
-    }, 2000);
-  } else {
-    statusText.style.color = "#ef4444";
-    statusText.innerText = "⚠️ Lütfen geçerli bir anahtar yapıştırın!";
-  }
-});
-
-document.body.addEventListener('click', () => {
-  if (!audioUnlocked) {
-    const initUtterance = new SpeechSynthesisUtterance('');
-    window.speechSynthesis.speak(initUtterance);
-    audioUnlocked = true;
-  }
-}, { once: true });
 
 // 🔊 Akıcı Türkçe Fonetik Okuma
 function speak(text) {
@@ -212,6 +178,50 @@ function speak(text) {
     window.speechSynthesis.speak(utterance);
   }
 }
+
+// Sayfa Yüklendiğinde Anahtar Kontrolü
+window.addEventListener('DOMContentLoaded', () => {
+  const savedKey = localStorage.getItem('JARVIS_API_KEY');
+  if (savedKey) {
+    apiKeyInput.value = savedKey;
+    statusText.innerText = "Sistemler aktif, sizi dinliyorum Murat Usta.";
+  }
+});
+
+// 🔑 GÜÇLENDİRİLMİŞ API KAYDETME BUTONU
+saveApiBtn.addEventListener('click', () => {
+  const key = apiKeyInput.value.trim();
+  
+  if (key && key.length > 5) {
+    try {
+      localStorage.setItem('JARVIS_API_KEY', key);
+      statusText.style.color = "#4ade80"; // Canlı Yeşil
+      statusText.innerText = "✅ API Anahtarı Başarıyla Kaydedildi!";
+      speak("API anahtarı sisteme tanımlandı Murat Usta.");
+      
+      setTimeout(() => {
+        statusText.style.color = "#7ef2ff";
+        statusText.innerText = "Hazır, komut verebilirsiniz Murat Usta.";
+      }, 3000);
+    } catch (e) {
+      statusText.style.color = "#ef4444";
+      statusText.innerText = "⚠️ Hafıza kaydetme hatası!";
+    }
+  } else {
+    statusText.style.color = "#ef4444"; // Kırmızı
+    statusText.innerText = "⚠️ Lütfen kutuya API anahtarını yapıştırın!";
+    speak("Lütfen geçerli bir anahtar yapıştırın.");
+  }
+});
+
+// Mobil Ses İzni
+document.body.addEventListener('click', () => {
+  if (!audioUnlocked) {
+    const initUtterance = new SpeechSynthesisUtterance('');
+    window.speechSynthesis.speak(initUtterance);
+    audioUnlocked = true;
+  }
+}, { once: true });
 
 async function processCommand(text) {
   if (!text || !text.trim()) return;
