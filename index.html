@@ -143,11 +143,14 @@
 </div>
 
 <script>
-// 🚀 Service Worker Başlatma (PWA Yükleme Hatasını Çözen Kısım)
+// 🚀 Otomatik v2 Sürüm Güncellemeli Service Worker Kaydı
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('SW Başarılı:', reg.scope))
+    navigator.serviceWorker.register('./sw.js?v=2')
+      .then(reg => {
+        console.log('Yeni SW Başarılı:', reg.scope);
+        reg.update(); // Eski önbelleği zorla günceller
+      })
       .catch(err => console.log('SW Hatası:', err));
   });
 }
@@ -327,5 +330,13 @@ if (SpeechRecognition) {
     processCommand(text);
   };
 
-  recognition.onerror =
-  
+  recognition.onerror = () => {
+    statusText.innerText = 'Ses anlaşılamadı.';
+  };
+} else {
+  statusText.innerText = 'Tarayıcı ses tanımayı desteklemiyor.';
+}
+</script>
+
+</body>
+</html>
