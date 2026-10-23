@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JARVIS</title>
+  
+  <!-- PWA Manifest Bağlantısı -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+
   <style>
     * { box-sizing: border-box; }
     body {
@@ -138,6 +143,15 @@
 </div>
 
 <script>
+// 🚀 Service Worker Başlatma (PWA Yükleme Hatasını Çözen Kısım)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW Başarılı:', reg.scope))
+      .catch(err => console.log('SW Hatası:', err));
+  });
+}
+
 const micBtn = document.getElementById('mic-btn');
 const statusText = document.getElementById('status');
 const chatBox = document.getElementById('chat-box');
@@ -180,12 +194,11 @@ document.body.addEventListener('click', () => {
   }
 }, { once: true });
 
-// 🔊 KESİN ÇÖZÜM: TÜRKÇE FONETİK OKUMA FONKSİYONU
+// 🔊 Akıcı Türkçe Fonetik Okuma
 function speak(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     
-    // Ekranda "JARVIS" yazacak ama ses motoru harf harf okumamak için "Ceyvis" olarak söyleyecek
     const readableText = text
       .replace(/JARVIS/g, "Ceyvis")
       .replace(/Jarvis/g, "Ceyvis");
@@ -314,13 +327,5 @@ if (SpeechRecognition) {
     processCommand(text);
   };
 
-  recognition.onerror = () => {
-    statusText.innerText = 'Ses anlaşılamadı.';
-  };
-} else {
-  statusText.innerText = 'Tarayıcı ses tanımayı desteklemiyor.';
-}
-</script>
-
-</body>
-</html>
+  recognition.onerror =
+  
