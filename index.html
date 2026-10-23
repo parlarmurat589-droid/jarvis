@@ -180,13 +180,15 @@ document.body.addEventListener('click', () => {
   }
 }, { once: true });
 
-// 🔊 HARF HARF OKUMAYI ENGELLEYEN GÜNCEL SES FONKSİYONU
+// 🔊 KESİN ÇÖZÜM: TÜRKÇE FONETİK OKUMA FONKSİYONU
 function speak(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     
-    // JARVIS kelimesini akıcı okuması için "Jarvis" formatına sokuyoruz
-    const readableText = text.replace(/JARVIS/g, "Jarvis");
+    // Ekranda "JARVIS" yazacak ama ses motoru harf harf okumamak için "Ceyvis" olarak söyleyecek
+    const readableText = text
+      .replace(/JARVIS/g, "Ceyvis")
+      .replace(/Jarvis/g, "Ceyvis");
     
     const utterance = new SpeechSynthesisUtterance(readableText);
     utterance.lang = 'tr-TR';
@@ -229,7 +231,7 @@ async function processCommand(text) {
 
   // 3. Kendini Tanıt Komutu
   if (lowerText.includes('tanıt') || lowerText.includes('kimsin')) {
-    const reply = "Ben Jarvis. Orijinalde Tony Stark tarafından tasarlandım; fakat bu dijital boyutta beni geliştiren dahi mühendis Murat'tır. Size hizmet etmekten onur duyarım Murat Usta.";
+    const reply = "Ben JARVIS. Orijinalde Tony Stark tarafından tasarlandım; fakat bu dijital boyutta beni geliştiren dahi mühendis Murat'tır. Size hizmet etmekten onur duyarım Murat Usta.";
     chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
     statusText.innerText = "Tanıtım yapıldı.";
     speak(reply);
