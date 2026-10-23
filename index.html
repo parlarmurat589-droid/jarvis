@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
@@ -148,7 +148,6 @@ const saveApiBtn = document.getElementById('save-api-btn');
 
 let audioUnlocked = false;
 
-// Sayfa yüklendiğinde hafızada varsa doğrudan al
 window.addEventListener('DOMContentLoaded', () => {
   const savedKey = localStorage.getItem('JARVIS_API_KEY');
   if (savedKey) {
@@ -157,24 +156,22 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Kaydet Butonuna Basıldığında (Tamamen Yerel Bildirim)
 saveApiBtn.addEventListener('click', () => {
   const key = apiKeyInput.value.trim();
   if (key && key.length > 5) {
     localStorage.setItem('JARVIS_API_KEY', key);
-    statusText.style.color = "#4ade80"; // Yeşil renk yap
+    statusText.style.color = "#4ade80";
     statusText.innerText = "✅ API Anahtarı Kaydedildi!";
     setTimeout(() => {
       statusText.style.color = "#7ef2ff";
       statusText.innerText = "Hazır, komut verebilirsiniz Murat Usta.";
     }, 2000);
   } else {
-    statusText.style.color = "#ef4444"; // Kırmızı renk yap
+    statusText.style.color = "#ef4444";
     statusText.innerText = "⚠️ Lütfen geçerli bir anahtar yapıştırın!";
   }
 });
 
-// Mobil Ses İzni
 document.body.addEventListener('click', () => {
   if (!audioUnlocked) {
     const initUtterance = new SpeechSynthesisUtterance('');
@@ -183,10 +180,15 @@ document.body.addEventListener('click', () => {
   }
 }, { once: true });
 
+// 🔊 HARF HARF OKUMAYI ENGELLEYEN GÜNCEL SES FONKSİYONU
 function speak(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // JARVIS kelimesini akıcı okuması için "Jarvis" formatına sokuyoruz
+    const readableText = text.replace(/JARVIS/g, "Jarvis");
+    
+    const utterance = new SpeechSynthesisUtterance(readableText);
     utterance.lang = 'tr-TR';
     utterance.rate = 1.0;
     window.speechSynthesis.speak(utterance);
@@ -227,7 +229,7 @@ async function processCommand(text) {
 
   // 3. Kendini Tanıt Komutu
   if (lowerText.includes('tanıt') || lowerText.includes('kimsin')) {
-    const reply = "Ben JARVIS. Orijinalde Tony Stark tarafından tasarlandım; fakat bu dijital boyutta beni geliştiren dahi mühendis Murat'tır. Size hizmet etmekten onur duyarım Murat Usta.";
+    const reply = "Ben Jarvis. Orijinalde Tony Stark tarafından tasarlandım; fakat bu dijital boyutta beni geliştiren dahi mühendis Murat'tır. Size hizmet etmekten onur duyarım Murat Usta.";
     chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
     statusText.innerText = "Tanıtım yapıldı.";
     speak(reply);
@@ -319,5 +321,4 @@ if (SpeechRecognition) {
 </script>
 
 </body>
-                                                         </html>
-                                                         
+</html>
