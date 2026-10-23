@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+        <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
@@ -28,7 +29,7 @@
       height: 90px;
       border-radius: 50%;
       border: 4px solid #00f2ff;
-      box-shadow: 0 0 20px #00f2ff;
+      box-shadow: 0 0 25px #00f2ff;
       margin: 15px auto;
       display: flex;
       align-items: center;
@@ -59,13 +60,14 @@
     }
     .input-group {
       display: flex;
-      gap: 8px;
+      gap: 5px;
+      margin-bottom: 10px;
     }
     #user-input {
       flex: 1;
       padding: 12px;
       border: 1px solid #00f2ff;
-      border-radius: 8px;
+      border-radius: 6px;
       background: rgba(0, 0, 0, 0.7);
       color: #ffffff;
       font-size: 1rem;
@@ -74,10 +76,19 @@
     #send-btn {
       padding: 12px 18px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #00f2ff;
       color: #0b0f19;
       font-weight: bold;
+      cursor: pointer;
+    }
+    .api-btn {
+      background: transparent;
+      border: 1px dashed #00f2ff;
+      color: #00f2ff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
       cursor: pointer;
     }
   </style>
@@ -90,107 +101,80 @@
   <div class="arc-reactor" id="mic-btn">
     <div class="core"></div>
   </div>
-  
+
   <div id="status">Ekrana bir kez dokunun...</div>
-  
   <div id="chat-box"></div>
-  
+
   <div class="input-group">
     <input type="text" id="user-input" placeholder="Jarvis'e bir şeyler yazın...">
     <button id="send-btn">Gönder</button>
   </div>
+
+  <button class="api-btn" onclick="setApiKey()">🔑 API Anahtarı Kaydet</button>
 </div>
 
 <script>
-  const micBtn = document.getElementById('mic-btn');
-  const status = document.getElementById('status');
-  const chatBox = document.getElementById('chat-box');
-  const userInput = document.getElementById('user-input');
-  const sendBtn = document.getElementById('send-btn');
+const micBtn = document.getElementById('mic-btn');
+const statusText = document.getElementById('status');
+const chatBox = document.getElementById('chat-box');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
 
-  let audioUnlocked = false;
+let audioUnlocked = false;
 
-  // Mobilde ses iznini aktifleştirme
-  document.body.addEventListener('click', () => {
-    if (!audioUnlocked) {
-      const initUtterance = new SpeechSynthesisUtterance("");
-      window.speechSynthesis.speak(initUtterance);
-      audioUnlocked = true;
-      status.innerText = "Hazır...";
-    }
-  }, { once: true });
+// API Anahtarını Kaydetme Fonksiyonu
+function setApiKey() {
+  const key = prompt("Lütfen Gemini API Anahtarınızı girin:");
+  if (key) {
+    localStorage.setItem('JARVIS_API_KEY', key.trim());
+    alert("API Anahtarı başarıyla kaydedildi! 🚀");
+  }
+}
 
-  function speak(text) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'tr-TR';
-      utterance.rate = 1.0;
-      window.speechSynthesis.speak(utterance);
+function getApiKey() {
+  let key = localStorage.getItem('JARVIS_API_KEY');
+  if (!key) {
+    key = prompt("Lütfen devam etmek için Gemini API Anahtarınızı girin:");
+    if (key) {
+      localStorage.setItem('JARVIS_API_KEY', key.trim());
     }
   }
+  return key;
+}
 
-  function processCommand(text) {
-    if (!text || text.trim() === "") return;
-    
-    chatBox.innerHTML += `<p style="color:#ffffff;"><b>Siz:</b> ${text}</p>`;
-    const lowerText = text.toLowerCase();
-
-    if (lowerText.includes("spotify")) {
-      const reply = "Derhal Murat Bey, Spotify sistemini devreye sokuyorum.";
-      chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
-      status.innerText = "Spotify açılıyor...";
-      
-      speak(reply);
-
-      // Doğrudan Spotify Uygulama Bağlantısı (Android Intent)
-      setTimeout(() => {
-        window.location.href = "intent://com.spotify.music/#Intent;scheme=android-app;end";
-      }, 1000);
-
-    } else {
-      const reply = `Anlaşıldı Murat Bey: ${text}`;
-      chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
-      status.innerText = "Komut işlendi.";
-      speak(reply);
-    }
-    
-    chatBox.scrollTop = chatBox.scrollHeight;
-    userInput.value = "";
+// Mobil ses izni
+document.body.addEventListener('click', () => {
+  if (!audioUnlocked) {
+    const initUtterance = new SpeechSynthesisUtterance('');
+    window.speechSynthesis.speak(initUtterance);
+    audioUnlocked = true;
+    statusText.innerText = 'Hazır...';
   }
+}, { once: true });
 
-  sendBtn.addEventListener('click', () => {
-    processCommand(userInput.value);
-  });
-
-  userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      processCommand(userInput.value);
-    }
-  });
-
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (Recognition) {
-    const recognition = new Recognition();
-    recognition.lang = 'tr-TR';
-
-    micBtn.addEventListener('click', () => {
-      recognition.start();
-      status.innerText = "Dinleniyor...";
-    });
-
-    recognition.onresult = (event) => {
-      const text = event.results[0][0].transcript;
-      processCommand(text);
-    };
-
-    recognition.onerror = () => {
-      status.innerText = "Ses anlaşılamadı.";
-    };
-  } else {
-    status.innerText = "Tarayıcı ses tanımayı desteklemiyor.";
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'tr-TR';
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
   }
-</script>
+}
 
-</body>
-</html>
+async function processCommand(text) {
+  if (!text || !text.trim()) return;
+
+  chatBox.innerHTML += `<p style="color:#ffffff;"><b>Siz:</b> ${text}</p>`;
+  const lowerText = text.toLowerCase();
+
+  // 1. Youtube Komutu
+  if (lowerText.includes('youtube')) {
+    const reply = "Derhal Murat Usta, YouTube sistemini devreye sokuyorum.";
+    chatBox.innerHTML += `<p style="color:#00f2ff;"><b>Jarvis:</b> ${reply}</p>`;
+    statusText.innerText = "YouTube açılıyor...";
+    speak(reply);
+    setTimeout(() => {
+      window.location.href = "intent://www.youtube.com#Intent;scheme=https;package=com.google.android.youtube;end";
+    },
+               
